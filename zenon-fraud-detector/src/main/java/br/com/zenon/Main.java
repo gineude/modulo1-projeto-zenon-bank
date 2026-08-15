@@ -1,10 +1,12 @@
 package br.com.zenon;
 
+import br.com.zenon.dao.TransactionIngestor;
 import br.com.zenon.fraud.Customer;
 import br.com.zenon.fraud.Transaction;
 import br.com.zenon.fraud.TransactionType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Main {
 
@@ -39,5 +41,10 @@ public class Main {
 
         System.out.println("Transação 1: " + t1);
         System.out.println("Transação 2: " + t2);
+
+        List<Transaction> transactions = TransactionIngestor.getTransactions("PS_20174392719_1491204439457_log.csv");
+        for (int i = 0; i < 10; i++) {
+            System.out.println((i+1) + " " + transactions.get(i));
+        }
     }
 }
