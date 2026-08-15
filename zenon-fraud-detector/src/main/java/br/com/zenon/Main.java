@@ -39,12 +39,12 @@ public class Main {
                 false
         );
 
-        System.out.println("Transação 1: " + t1);
-        System.out.println("Transação 2: " + t2);
+        IO.println("Transação 1: " + t1);
+        IO.println("Transação 2: " + t2);
 
         List<Transaction> transactions = TransactionIngestor.getTransactions("PS_20174392719_1491204439457_log.csv");
         for (int i = 0; i < 10; i++) {
-            System.out.println((i+1) + " " + transactions.get(i));
+            IO.println((i + 1) + " " + transactions.get(i));
         }
     }
 }
