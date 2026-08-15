@@ -50,8 +50,7 @@ target/
 .springBeans
 .sts4-cache
 
-**/.gradle/*
-**/.build/*
+.gradle/
 
 ### NetBeans ###
 /nbproject/private/

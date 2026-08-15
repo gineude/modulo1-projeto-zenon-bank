@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,14 +21,25 @@ public class TransactionIngestor {
 
     private static final Logger logger = Logger.getLogger(TransactionIngestor.class.getName());
 
-    private TransactionIngestor() {
-        // nao instanciavel
+    public List<Transaction> readTransactions(String fileName) {
+        Path path = Paths.get("../data", fileName);
+        try {
+            List<String> lines = Files.readAllLines(path);
+            return lines.stream()
+                    .skip(1)
+                    .limit(1000)
+                    .map(this::etractTransaction)
+                    .toList();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Erro ao ler o arquivo: " + fileName, e);
+        }
+        return null;
     }
 
-    public static List<Transaction> getTransactions(String arquivo) {
+    public List<Transaction> getTransactionsOldSchool(String arquivo) {
         List<Transaction> transactions = new ArrayList<>();
 
-        int milLinhas = 1000;
+        int milLinhas = 1001;
         Path path = Paths.get("../data", arquivo);
 
         try (InputStream IS = new FileInputStream(path.toFile())) {
@@ -49,7 +61,7 @@ public class TransactionIngestor {
         return transactions;
     }
 
-    private static Transaction etractTransaction(String line) {
+    private Transaction etractTransaction(String line) {
         String[] fields = line.split(",");
         if (!"step".equals(fields[0])) {
             int step = Integer.parseInt(fields[0]);
@@ -59,8 +71,8 @@ public class TransactionIngestor {
 
             TransactionType type = TransactionType.valueOf(fields[1]);
 
-            Customer origin = new Customer(fields[3], new BigDecimal(fields[4]), new BigDecimal(fields[5]));
-            Customer recipient = new Customer(fields[6], new BigDecimal(fields[7]), new BigDecimal(fields[8]));
+            var origin = new Customer(fields[3], new BigDecimal(fields[4]), new BigDecimal(fields[5]));
+            var recipient = new Customer(fields[6], new BigDecimal(fields[7]), new BigDecimal(fields[8]));
 
             return new Transaction(step, type, amount, origin, recipient, isFraud, isFlaggedFraud);
         }
