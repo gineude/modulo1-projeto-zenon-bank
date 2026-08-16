@@ -42,20 +42,33 @@ public class Main {
         IO.println("Transação 1: " + t1);
         IO.println("Transação 2: " + t2);
 
+        //String fileName = "PS_20174392719_1491204439457_log.csv";
+        String fileName = "paysim_with_bad_data.csv";
+
+        extraindoOldSchoolJava(fileName);
+
+        //extraindoNewSchoolJava(fileName);
+    }
+
+    /*private static void extraindoNewSchoolJava(String fileName) {
         TransactionIngestor transactionIngestor = new TransactionIngestor();
 
-        long inicio = System.currentTimeMillis();
-        List<Transaction> transactions = transactionIngestor.getTransactionsOldSchool("PS_20174392719_1491204439457_log.csv");
-        transactions.stream().limit(10).forEach(IO::println);
-        long fin = System.currentTimeMillis();
-
-        IO.println("Demorou " + (fin - inicio) + " ms");
-
         long inicio2 = System.currentTimeMillis();
-        transactions = transactionIngestor.readTransactions("PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactions = transactionIngestor.readTransactions(fileName);
         transactions.stream().limit(10).forEach(IO::println);
         long fin2 = System.currentTimeMillis();
 
         IO.println("Demorou " + (fin2 - inicio2) + " ms");
+    }*/
+
+    private static void extraindoOldSchoolJava(String fileName) {
+        TransactionIngestor transactionIngestor = new TransactionIngestor();
+
+        long inicio = System.currentTimeMillis();
+        List<Transaction> transactions = transactionIngestor.getTransactionsOldSchool(fileName);
+        transactions.forEach(System.out::println);
+        long fin = System.currentTimeMillis();
+
+        System.out.println("Demorou " + (fin - inicio) + " ms");
     }
 }

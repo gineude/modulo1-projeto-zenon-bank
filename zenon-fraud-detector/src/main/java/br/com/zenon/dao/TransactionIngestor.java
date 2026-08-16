@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,61 +22,99 @@ public class TransactionIngestor {
 
     private static final Logger logger = Logger.getLogger(TransactionIngestor.class.getName());
 
-    public List<Transaction> readTransactions(String fileName) {
+    /*public List<Transaction> readTransactions(String fileName) {
         Path path = Paths.get("../data", fileName);
         try {
             List<String> lines = Files.readAllLines(path);
             return lines.stream()
                     .skip(1)
                     .limit(1000)
-                    .map(this::etractTransaction)
+                    .map(this::extractTransaction)
                     .toList();
         } catch (IOException e) {
             logger.log(Level.WARNING, "Erro ao ler o arquivo: " + fileName, e);
         }
         return null;
-    }
+    }*/
 
     public List<Transaction> getTransactionsOldSchool(String arquivo) {
         List<Transaction> transactions = new ArrayList<>();
 
-        int milLinhas = 1001;
+        int milLinhas = 0;
         Path path = Paths.get("../data", arquivo);
 
-        try (InputStream IS = new FileInputStream(path.toFile())) {
+        try (InputStream IS = new FileInputStream(path.toFile()); Scanner scanner = new Scanner(IS)) {
 
-            Scanner scanner = new Scanner(IS);
-            while (scanner.hasNext() && milLinhas > 0) {
+            while (scanner.hasNext()) {
                 String line = scanner.nextLine();
-                Transaction transaction = etractTransaction(line);
-                if (transaction != null) {
-                    transactions.add(transaction);
+                milLinhas++;
+                if (milLinhas == 1) {
+                    continue;
                 }
-                milLinhas--;
+                Optional<Transaction> transactionOptional = extractTransaction(line);
+                transactionOptional.ifPresent(transactions::add);
             }
 
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Erro ao ler o arquivo: " + arquivo, e);
+            System.out.println("Error : " + arquivo);
         }
 
         return transactions;
     }
 
-    private Transaction etractTransaction(String line) {
-        String[] fields = line.split(",");
-        if (!"step".equals(fields[0])) {
-            int step = Integer.parseInt(fields[0]);
-            BigDecimal amount = new BigDecimal(fields[2]);
+    private Optional<Transaction> extractTransaction(String line) {
+
+        try {
+
+            String[] fields = line.split(",");
+
+            int step = Integer.parseInt(validarStep(fields[0]));
+            BigDecimal amount = new BigDecimal(validaBigDecimal(fields[2]));
+
             boolean isFraud = Boolean.parseBoolean(fields[9]);
             boolean isFlaggedFraud = Boolean.parseBoolean(fields[10]);
 
             TransactionType type = TransactionType.valueOf(fields[1]);
 
-            var origin = new Customer(fields[3], new BigDecimal(fields[4]), new BigDecimal(fields[5]));
-            var recipient = new Customer(fields[6], new BigDecimal(fields[7]), new BigDecimal(fields[8]));
+            BigDecimal oldBalance = new BigDecimal(validaBigDecimal(fields[4]));
+            BigDecimal newBalance = new BigDecimal(validaBigDecimal(fields[5]));
 
-            return new Transaction(step, type, amount, origin, recipient, isFraud, isFlaggedFraud);
+            var origin = new Customer(fields[3], oldBalance, newBalance);
+
+            BigDecimal oldBalanceRecipient = new BigDecimal(validaBigDecimal(fields[7]));
+            BigDecimal newBalanceRecipient = new BigDecimal(validaBigDecimal(fields[8]));
+
+            var recipient = new Customer(fields[6], oldBalanceRecipient, newBalanceRecipient);
+
+            return Optional.of(new Transaction(step, type, amount, origin, recipient, isFraud, isFlaggedFraud));
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error : " + line);
+            return Optional.empty();
         }
-        return null;
     }
+
+    private String validarStep(String field) throws IllegalArgumentException {
+        try {
+            int valor = Integer.parseInt(field);
+            if (valor <= 0) {
+                throw new IllegalArgumentException();
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException();
+        }
+        return field;
+    }
+
+    private String validaBigDecimal(String field) throws IllegalArgumentException {
+        try {
+            BigDecimal valor = new BigDecimal(field);
+            if (valor.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException();
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException();
+        }
+        return field;
+    }
+
 }
