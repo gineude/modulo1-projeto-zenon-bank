@@ -42,6 +42,8 @@ public class Main {
         IO.println("Transação 1: " + t1);
         IO.println("Transação 2: " + t2);
 
+        IO.println("-------------------------------------------------------------------------");
+
         //String fileName = "PS_20174392719_1491204439457_log.csv";
         String fileName = "paysim_with_bad_data.csv";
 
