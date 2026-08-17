@@ -1,42 +1,32 @@
 package br.com.zenon.dao;
 
-import br.com.zenon.fraud.Customer;
 import br.com.zenon.fraud.Transaction;
-import br.com.zenon.fraud.TransactionType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class TransactionIngestor {
+public class TransactionListRepository implements TransactionRepository {
 
-    private static final Logger logger = Logger.getLogger(TransactionIngestor.class.getName());
+    private final List<Transaction> transactions;
 
-    public List<Transaction> readTransactions(String fileName) {
-        Path path = Paths.get("../data", fileName);
-        try {
-            List<String> lines = Files.readAllLines(path);
-            return lines.stream()
-                    .skip(1)
-                    .limit(1000)
-                    .map(TransactionRepositoryHelper::extractTransaction)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .toList();
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Erro ao ler o arquivo: " + fileName, e);
-        }
-        return null;
+    public TransactionListRepository(int limit) {
+        String fileName = "PS_20174392719_1491204439457_log.csv";
+        this.transactions = getTransactionsOldSchool(fileName, limit);
+    }
+
+    @Override
+    public Optional<Transaction> findByOriginName(String name, int limit) {
+        return transactions
+                .stream()
+                .filter(t -> t.origin().name().equals(name))
+                .findFirst();
     }
 
     public List<Transaction> getTransactionsOldSchool(String arquivo, int quantidade) {
@@ -63,5 +53,4 @@ public class TransactionIngestor {
 
         return transactions;
     }
-
 }

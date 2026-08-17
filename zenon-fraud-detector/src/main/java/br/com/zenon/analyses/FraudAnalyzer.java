@@ -8,11 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FraudAnalyzer {
 
     public long qtdeFraudes(List<Transaction> transactions) {
-        return transactions.stream().filter(Transaction::isFraud).count();
+        return getTransactionFilterStream(transactions).count();
     }
 
     public List<String> topThreeFrauds(List<Transaction> transactions) {
@@ -26,9 +27,7 @@ public class FraudAnalyzer {
     }
 
     public List<String> topFiveNamesFrauds(List<Transaction> transactions) {
-        return transactions
-                .stream()
-                .filter(Transaction::isFraud)
+        return getTransactionFilterStream(transactions)
                 .sorted(Comparator.comparing(Transaction::amount).reversed())
                 .limit(5)
                 .map(t -> t.origin().name())
@@ -36,19 +35,19 @@ public class FraudAnalyzer {
     }
 
     public BigDecimal sumTotalFrauds(List<Transaction> transactions) {
-        return transactions
-                .stream()
-                .filter(Transaction::isFraud)
+        return getTransactionFilterStream(transactions)
                 .map(Transaction::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public Map<TransactionType, Long> groupingTypeFrauds(List<Transaction> transactions) {
-        return transactions
-                .stream()
-                .filter(Transaction::isFraud)
+        return getTransactionFilterStream(transactions)
                 .collect(Collectors.groupingBy(
                         Transaction::type,
                         Collectors.counting()));
+    }
+
+    private Stream<Transaction> getTransactionFilterStream(List<Transaction> transactions) {
+        return transactions.stream().filter(Transaction::isFraud);
     }
 }
