@@ -1,13 +1,10 @@
 package br.com.zenon.dao;
 
-import br.com.zenon.fraud.Customer;
 import br.com.zenon.fraud.Transaction;
-import br.com.zenon.fraud.TransactionType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,13 +19,12 @@ public class TransactionIngestor {
 
     private static final Logger logger = Logger.getLogger(TransactionIngestor.class.getName());
 
-    public List<Transaction> readTransactions(String fileName) {
+    public List<Transaction> readTransactionsNewSchool(String fileName) {
         Path path = Paths.get("../data", fileName);
         try {
             List<String> lines = Files.readAllLines(path);
             return lines.stream()
                     .skip(1)
-                    .limit(1000)
                     .map(TransactionRepositoryHelper::extractTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
@@ -39,18 +35,16 @@ public class TransactionIngestor {
         return null;
     }
 
-    public List<Transaction> getTransactionsOldSchool(String arquivo, int quantidade) {
+    public List<Transaction> readTransactionsOldSchool(String arquivo) {
         List<Transaction> transactions = new ArrayList<>();
 
         Path path = Paths.get("../data", arquivo);
 
         try (InputStream IS = new FileInputStream(path.toFile()); Scanner scanner = new Scanner(IS)) {
 
-            int quantidadeOriginal = quantidade;
-            while (scanner.hasNext() && quantidade > 0) {
+            while (scanner.hasNext()) {
                 String line = scanner.nextLine();
-                quantidade--;
-                if (quantidade == (quantidadeOriginal - 1)) {
+                if (line.contains("step,type,amount,nameOrig")) {
                     continue;
                 }
                 Optional<Transaction> transactionOptional = TransactionRepositoryHelper.extractTransaction(line);

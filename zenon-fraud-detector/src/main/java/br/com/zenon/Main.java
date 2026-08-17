@@ -2,8 +2,6 @@ package br.com.zenon;
 
 import br.com.zenon.analyses.FraudAnalyzer;
 import br.com.zenon.dao.TransactionIngestor;
-import br.com.zenon.dao.TransactionListRepository;
-import br.com.zenon.dao.TransactionMapRepository;
 import br.com.zenon.dao.TransactionRepository;
 import br.com.zenon.fraud.Customer;
 import br.com.zenon.fraud.Transaction;
@@ -59,12 +57,12 @@ public class Main {
 
         TransactionIngestor transactionIngestor = new TransactionIngestor();
 
-        //List<Transaction> transactionsNewSchool = transactionIngestor.readTransactions(fileName);
+        List<Transaction> transactions = transactionIngestor.readTransactionsOldSchool(fileName);
 
-        //extraindoOldSchoolJava(transactions);
+        extraindoOldSchoolJava(transactions);
 
         //extraindoNewSchoolJava(transactionsNewSchool);
-        out.println("------------------------- Buscando por nome --------------------------");
+        /*out.println("------------------------- Buscando por nome --------------------------");
 
         TransactionRepository repositoryList = new TransactionListRepository(100001);
         TransactionRepository repositoryMap = new TransactionMapRepository(100001);
@@ -81,7 +79,7 @@ public class Main {
         imprimindoBuscaWithMap(out, "C1231006815", repositoryMap);
 
         System.out.println("Com nome não existente map");
-        imprimindoBuscaWithMap(out, "C12345", repositoryMap);
+        imprimindoBuscaWithMap(out, "C12345", repositoryMap);*/
     }
 
     private static void imprimindoBuscaWithList(PrintStream out, String nameFind, TransactionRepository repository) {
