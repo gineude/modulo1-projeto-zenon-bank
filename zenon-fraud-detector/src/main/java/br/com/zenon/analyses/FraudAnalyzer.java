@@ -17,9 +17,7 @@ public class FraudAnalyzer {
     }
 
     public List<String> topThreeFrauds(List<Transaction> transactions) {
-        return transactions
-                .stream()
-                .filter(Transaction::isFraud)
+        return getTransactionFilterStream(transactions)
                 .sorted(Comparator.comparing(Transaction::amount).reversed())
                 .limit(3)
                 .map(t -> t.amount().toPlainString())
@@ -29,6 +27,7 @@ public class FraudAnalyzer {
     public List<String> topFiveNamesFrauds(List<Transaction> transactions) {
         return getTransactionFilterStream(transactions)
                 .sorted(Comparator.comparing(Transaction::amount).reversed())
+                .distinct()
                 .limit(5)
                 .map(t -> t.origin().name())
                 .toList();
