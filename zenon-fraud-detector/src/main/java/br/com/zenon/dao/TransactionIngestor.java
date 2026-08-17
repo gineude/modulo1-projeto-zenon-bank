@@ -37,18 +37,18 @@ public class TransactionIngestor {
         return null;
     }*/
 
-    public List<Transaction> getTransactionsOldSchool(String arquivo) {
+    public List<Transaction> getTransactionsOldSchool(String arquivo, int quantidade) {
         List<Transaction> transactions = new ArrayList<>();
 
-        int milLinhas = 0;
         Path path = Paths.get("../data", arquivo);
 
         try (InputStream IS = new FileInputStream(path.toFile()); Scanner scanner = new Scanner(IS)) {
 
-            while (scanner.hasNext()) {
+            int quantidadeOriginal = quantidade;
+            while (scanner.hasNext() && quantidade > 0) {
                 String line = scanner.nextLine();
-                milLinhas++;
-                if (milLinhas == 1) {
+                quantidade--;
+                if (quantidade == (quantidadeOriginal - 1)) {
                     continue;
                 }
                 Optional<Transaction> transactionOptional = extractTransaction(line);
@@ -71,8 +71,8 @@ public class TransactionIngestor {
             int step = Integer.parseInt(validarStep(fields[0]));
             BigDecimal amount = new BigDecimal(validaBigDecimal(fields[2]));
 
-            boolean isFraud = Boolean.parseBoolean(fields[9]);
-            boolean isFlaggedFraud = Boolean.parseBoolean(fields[10]);
+            boolean isFraud = "1".trim().equals(fields[9]);
+            boolean isFlaggedFraud = "1".trim().equals(fields[10]);
 
             TransactionType type = TransactionType.valueOf(fields[1]);
 

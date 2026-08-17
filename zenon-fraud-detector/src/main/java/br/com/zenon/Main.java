@@ -1,5 +1,6 @@
 package br.com.zenon;
 
+import br.com.zenon.analyses.FraudAnalyzer;
 import br.com.zenon.dao.TransactionIngestor;
 import br.com.zenon.fraud.Customer;
 import br.com.zenon.fraud.Transaction;
@@ -44,8 +45,8 @@ public class Main {
 
         IO.println("-------------------------------------------------------------------------");
 
-        //String fileName = "PS_20174392719_1491204439457_log.csv";
-        String fileName = "paysim_with_bad_data.csv";
+        String fileName = "PS_20174392719_1491204439457_log.csv";
+        //String fileName = "paysim_with_bad_data.csv";
 
         extraindoOldSchoolJava(fileName);
 
@@ -66,11 +67,28 @@ public class Main {
     private static void extraindoOldSchoolJava(String fileName) {
         TransactionIngestor transactionIngestor = new TransactionIngestor();
 
-        long inicio = System.currentTimeMillis();
-        List<Transaction> transactions = transactionIngestor.getTransactionsOldSchool(fileName);
-        transactions.forEach(System.out::println);
-        long fin = System.currentTimeMillis();
+        List<Transaction> transactions = transactionIngestor.getTransactionsOldSchool(fileName, 50001);
+        IO.println("Total de dados analisados: " +  transactions.size());
 
-        System.out.println("Demorou " + (fin - inicio) + " ms");
+        IO.println("-------------------------------------------------------------------------");
+
+        FraudAnalyzer fraudAnalyzer = new FraudAnalyzer();
+        IO.println("Total de Fraudes: " + fraudAnalyzer.qtdeFraudes(transactions));
+
+        IO.println("Top 3 Fraudes de Maior Valor:");
+        fraudAnalyzer.topThreeFrauds(transactions).forEach(IO::println);
+
+        IO.println("Clientes Suspeitos:");
+        fraudAnalyzer.topFiveNamesFrauds(transactions).forEach(IO::println);
+
+        BigDecimal totalFrauds = fraudAnalyzer.sumTotalFrauds(transactions);
+
+        IO.println("Prejuízo Total: " + totalFrauds);
+
+
+        IO.println("Fraudes por Tipo: ");
+        fraudAnalyzer.groupingTypeFrauds(transactions)
+                .forEach((type, count) -> IO.println(" - " + type.name() + ": " + count));
+
     }
 }
