@@ -2,7 +2,9 @@ package br.com.zenon;
 
 import br.com.zenon.reports.TransactionReport;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -20,8 +22,8 @@ public class ReportMain {
         Locale localePtBr = Locale.of("pt", "BR");
 
         ResourceBundle bundleUs = ResourceBundle.getBundle("report", localeUs);
-        NumberFormat numberFormatUsMoeda = NumberFormat.getCurrencyInstance(localeUs);
-        NumberFormat numberFormatUsInteiro = NumberFormat.getNumberInstance(localeUs);
+        NumberFormat numberFormatUsMoeda = DecimalFormat.getCurrencyInstance(localeUs);
+        NumberFormat numberFormatUsInteiro = NumberFormat.getIntegerInstance(localeUs);
 
         String totalAmount = numberFormatUsMoeda.format(st.totalAmount());
         String totalFrauds = numberFormatUsInteiro.format(st.totalFrauds());
@@ -36,9 +38,10 @@ public class ReportMain {
         System.out.println(totalFraudes);
         System.out.println(totalTransacionado);
 
-        ResourceBundle bundlePtBr = ResourceBundle.getBundle("report", localePtBr);
-        NumberFormat numberFormatPtBrMoeda = NumberFormat.getCurrencyInstance(localePtBr);
-        NumberFormat numberFormatPtBrInteiro = NumberFormat.getNumberInstance(localePtBr);
+        var bundlePtBr = ResourceBundle.getBundle("report", localePtBr);
+        NumberFormat numberFormatPtBrMoeda = DecimalFormat.getCurrencyInstance(localePtBr);
+        numberFormatPtBrMoeda.setCurrency(Currency.getInstance("USD"));
+        NumberFormat numberFormatPtBrInteiro = NumberFormat.getIntegerInstance(localePtBr);
 
         String totalAmountPt = numberFormatPtBrMoeda.format(st.totalAmount());
         String totalFraudsPt = numberFormatPtBrInteiro.format(st.totalFrauds());
