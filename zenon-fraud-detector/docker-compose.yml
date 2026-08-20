@@ -1,0 +1,15 @@
+services:
+
+  db:
+    image: mysql:9.5
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-config:/etc/mysql/conf.d
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: zenon-fraud-dedector
+volumes:
+  mysql.zenon-fraud-dedector:
