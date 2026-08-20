@@ -22,11 +22,16 @@ public class TransactionListRepository implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByOriginName(String name, int limit) {
+    public Optional<Transaction> findByOriginName(String name) {
         return transactions
                 .stream()
                 .filter(t -> t.origin().name().equals(name))
                 .findFirst();
+    }
+
+    @Override
+    public void save(Transaction transaction) {
+        this.transactions.add(transaction);
     }
 
     public List<Transaction> getTransactionsOldSchool(String arquivo, int quantidade) {

@@ -11,7 +11,40 @@ import java.util.Optional;
 public class TransactionSQLRepository implements TransactionRepository {
 
     @Override
-    public Optional<Transaction> findByOriginName(String name, int limit) {
+    public void save(Transaction transaction) {
+        String url = "jdbc:mysql://localhost:3306/zenon-fraud-dedector?rewriteBatchedStatements=true";
+        String usuario = "root";
+        String senha = "admin123";
+
+        String sql = """
+                    INSERT INTO transactions (step, `type`, amount, nameOrig, oldbalanceOrg, newbalanceOrig,
+                        nameDest, oldbalanceDest, newbalanceDest, isFraud, isFlaggedFraud)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    WHERE nameOrig = ?
+                """;
+
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha);
+             PreparedStatement ps = conn.prepareStatement(sql.trim())) {
+            ps.setInt(1, transaction.step());
+            ps.setString(2, transaction.type().name());
+            ps.setBigDecimal(3, transaction.amount());
+            ps.setString(4, transaction.origin().name());
+            ps.setBigDecimal(5, transaction.origin().newBalance());
+            ps.setBigDecimal(6, transaction.origin().oldBalance());
+            ps.setString(7, transaction.destination().name());
+            ps.setBigDecimal(8, transaction.destination().newBalance());
+            ps.setBigDecimal(9, transaction.destination().oldBalance());
+            ps.setBoolean(10, transaction.isFraud());
+            ps.setBoolean(11, transaction.isFlaggedFraud());
+
+            ps.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar registro na base de dados", e);
+        }
+    }
+
+    @Override
+    public Optional<Transaction> findByOriginName(String name) {
         String url = "jdbc:mysql://localhost:3306/zenon-fraud-dedector?rewriteBatchedStatements=true";
         String usuario = "root";
         String senha = "admin123";

@@ -23,12 +23,17 @@ public class TransactionMapRepository implements TransactionRepository {
     }
 
     @Override
-    public Optional<Transaction> findByOriginName(String name, int limit) {
+    public Optional<Transaction> findByOriginName(String name) {
         Transaction transaction = transactions.get(name);
         if (transaction != null) {
             return Optional.of(transaction);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void save(Transaction transaction) {
+        this.transactions.putIfAbsent(transaction.origin().name(), transaction);
     }
 
     private Map<String, Transaction> transactionsOldSchool(String arquivo, int quantidade) {

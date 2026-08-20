@@ -16,24 +16,23 @@ public class DBMain {
         TransactionIngestor transactionIngestor = new TransactionIngestor();
 
         long inicio = System.nanoTime();
-        transactionIngestor.csvBatchInsert(fileName);
+        //transactionIngestor.csvBatchInsert(fileName);
         long fim = System.nanoTime();
 
         long result = fim - inicio;
 
         long emMiliSegundos = TimeUnit.NANOSECONDS.toMillis(result);
-        long emSegundos = TimeUnit.NANOSECONDS.toSeconds(result);
-        System.out.println("A inserção do dados demorou: " + emMiliSegundos + "ms" + " em segundos " + emSegundos);
+        System.out.println("A inserção do dados demorou: " + emMiliSegundos + "ms");
 
         System.out.println("---------------------------------------------------------------------------------------");
         TransactionRepository repository = new TransactionSQLRepository();
 
-        Optional<Transaction> transaction = repository.findByOriginName("C1231006815", 0);
+        Optional<Transaction> transaction = repository.findByOriginName("C1231006815");
         transaction.ifPresent(System.out::println);
         System.out.println();
 
         System.out.println("Buscando valor inexistente");
-        transaction = repository.findByOriginName("C12345", 0);
+        transaction = repository.findByOriginName("C12345");
         transaction.ifPresent(System.out::println);
     }
 }
