@@ -75,62 +75,63 @@ public class TransactionIngestor {
                     nameDest, oldbalanceDest, newbalanceDest, isFraud, isFlaggedFraud)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
-        int tamanhoBatch = 1000;  // Lotes menores para otimizar memória e rede
-        int limiteTotal = 10000; // Interrompe o arquivo após 10 mil inserções
+        int tamanhoBatch = 10000;  // Lotes menores para otimizar memória e rede
+        //int limiteTotal = 10000; // Interrompe o arquivo após 10 mil inserções
 
-        try (Connection conn = DriverManager.getConnection(url, usuario, senha);
-             PreparedStatement pstmt = conn.prepareStatement(sql.trim());
-             Stream<String> linhas = Files.lines(caminhoCsv)) {
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
 
             conn.setAutoCommit(false);
 
             int[] contador = {0};
+            try (PreparedStatement ps = conn.prepareStatement(sql.trim());
+                 Stream<String> linhas = Files.lines(caminhoCsv)) {
 
-            linhas.skip(1)
-                    .limit(limiteTotal)
-                    .forEach(linha -> {
-                        try {
+                linhas.skip(1)
+                        //.limit(limiteTotal)
+                        .forEach(linha -> {
+                            try {
 
-                            String[] campos = linha.split(",");
+                                String[] campos = linha.split(",");
+                                ps.setString(1, campos[0].trim());
+                                ps.setString(2, campos[1].trim());
+                                ps.setString(3, campos[2].trim());
+                                ps.setString(4, campos[3].trim());
+                                ps.setString(5, campos[4].trim());
+                                ps.setString(6, campos[5].trim());
+                                ps.setString(7, campos[6].trim());
+                                ps.setString(8, campos[7].trim());
+                                ps.setString(9, campos[8].trim());
+                                ps.setString(10, campos[9].trim());
+                                ps.setString(11, campos[10].trim());
 
-                            if (campos.length >= 3) {
-                                pstmt.setString(1,  campos[0].trim());
-                                pstmt.setString(2,  campos[1].trim());
-                                pstmt.setString(3,  campos[2].trim());
-                                pstmt.setString(4,  campos[3].trim());
-                                pstmt.setString(5,  campos[4].trim());
-                                pstmt.setString(6,  campos[5].trim());
-                                pstmt.setString(7,  campos[6].trim());
-                                pstmt.setString(8,  campos[7].trim());
-                                pstmt.setString(9,  campos[8].trim());
-                                pstmt.setString(10, campos[9].trim());
-                                pstmt.setString(11, campos[10].trim());
-
-                                pstmt.addBatch();
+                                ps.addBatch();
                                 contador[0]++;
 
                                 if (contador[0] % tamanhoBatch == 0) {
-                                    pstmt.executeBatch();
+                                    ps.executeBatch();
                                 }
+                            } catch (SQLException e) {
+                                throw new RuntimeException("Erro ao adicionar registro ao lote: " + linha, e);
                             }
-                        } catch (SQLException e) {
-                            throw new RuntimeException("Erro ao adicionar registro ao lote: " + linha, e);
-                        }
-                    });
+                        });
 
-            if (contador[0] % tamanhoBatch != 0) {
-                pstmt.executeBatch();
+                if (contador[0] % tamanhoBatch != 0) {
+                    ps.executeBatch();
+                }
+
+                conn.commit();
+                System.out.println("Processamento concluído. Total de registros inseridos: " + contador[0]);
+
+            } catch (IOException | SQLException e) {
+                if (e instanceof SQLException) {
+                    conn.rollback();
+                }
+                System.err.println("Erro ao ler o arquivo CSV: " + e.getMessage());
             }
-
-            conn.commit();
-            System.out.println("Processamento concluído. Total de registros inseridos: " + contador[0]);
-
-        } catch (IOException e) {
-            System.err.println("Erro ao ler o arquivo CSV: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println("Erro na transação. Executando rollback... Motivo: " + e.getMessage());
+            throw new RuntimeException("Erro ao realizar rollback na base: " + e.getMessage());
         }
-
     }
 
 }

@@ -92,7 +92,7 @@ public class Main {
 
     private static void benchmarkBusca(PrintStream out, String nameFind, TransactionRepository repository) {
         long inicio = System.nanoTime();
-        Optional<Transaction> transaction = repository.findByOriginName(nameFind, 100001);
+        Optional<Transaction> transaction = repository.findByOriginName(nameFind);
         if (transaction.isPresent()) {
             out.println(transaction.get());
             out.println();
